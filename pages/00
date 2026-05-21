@@ -1,1 +1,148 @@
+# app.py
+# Streamlit Cloud용 서울 관광지 지도 앱
+# 실행 방법:
+# 1) requirements.txt 에 아래 추가
+# streamlit
+# pandas
+# pydeck
+#
+# 2) streamlit run app.py
 
+import streamlit as st
+import pandas as pd
+import pydeck as pdk
+
+st.set_page_config(
+    page_title="서울 관광지 추천 지도",
+    page_icon="🗺️",
+    layout="wide"
+)
+
+st.title("🗺️ 외국인이 좋아하는 서울 관광지 TOP 10")
+st.markdown("가고 싶은 관광지를 선택하면 간략한 설명과 가까운 지하철역 정보를 확인할 수 있습니다.")
+
+# 관광지 데이터
+places = [
+    {
+        "name": "경복궁",
+        "lat": 37.579617,
+        "lon": 126.977041,
+        "description": "조선 시대의 대표 궁궐입니다. 한복 체험과 수문장 교대식이 유명합니다.",
+        "subway": "경복궁역(3호선) 도보 5분"
+    },
+    {
+        "name": "북촌 한옥마을",
+        "lat": 37.582604,
+        "lon": 126.983998,
+        "description": "전통 한옥이 모여 있는 서울 대표 전통 마을입니다.",
+        "subway": "안국역(3호선) 도보 10분"
+    },
+    {
+        "name": "명동",
+        "lat": 37.563757,
+        "lon": 126.985302,
+        "description": "쇼핑과 길거리 음식으로 유명한 관광 지역입니다.",
+        "subway": "명동역(4호선) 바로 연결"
+    },
+    {
+        "name": "N서울타워",
+        "lat": 37.551169,
+        "lon": 126.988227,
+        "description": "서울 야경 명소로 유명한 전망 타워입니다.",
+        "subway": "명동역(4호선) + 남산 케이블카"
+    },
+    {
+        "name": "홍대거리",
+        "lat": 37.556336,
+        "lon": 126.922652,
+        "description": "젊은 분위기의 거리로 공연, 카페, 쇼핑이 유명합니다.",
+        "subway": "홍대입구역(2호선)"
+    },
+    {
+        "name": "강남",
+        "lat": 37.497942,
+        "lon": 127.027621,
+        "description": "서울의 현대적인 분위기를 느낄 수 있는 대표 지역입니다.",
+        "subway": "강남역(2호선)"
+    },
+    {
+        "name": "롯데월드타워",
+        "lat": 37.513068,
+        "lon": 127.102675,
+        "description": "서울 최고 높이의 랜드마크와 전망대를 즐길 수 있습니다.",
+        "subway": "잠실역(2호선) 연결"
+    },
+    {
+        "name": "인사동",
+        "lat": 37.574363,
+        "lon": 126.985458,
+        "description": "전통 공예품과 한국 문화를 체험할 수 있는 거리입니다.",
+        "subway": "안국역(3호선)"
+    },
+    {
+        "name": "동대문디자인플라자(DDP)",
+        "lat": 37.566526,
+        "lon": 127.009223,
+        "description": "독특한 건축물과 야간 조명이 유명한 문화 공간입니다.",
+        "subway": "동대문역사문화공원역(2·4·5호선)"
+    },
+    {
+        "name": "한강공원",
+        "lat": 37.528316,
+        "lon": 126.932598,
+        "description": "자전거, 피크닉, 라면 먹기로 유명한 서울 시민 휴식 공간입니다.",
+        "subway": "여의나루역(5호선)"
+    }
+]
+
+df = pd.DataFrame(places)
+
+# 지도 표시
+st.subheader("📍 서울 관광지 지도")
+
+layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=df,
+    get_position='[lon, lat]',
+    get_color='[255, 0, 0, 180]',
+    get_radius=250,
+    pickable=True
+)
+
+view_state = pdk.ViewState(
+    latitude=37.5665,
+    longitude=126.9780,
+    zoom=11
+)
+
+tooltip = {
+    "html": "<b>{name}</b>",
+    "style": {
+        "backgroundColor": "steelblue",
+        "color": "white"
+    }
+}
+
+deck = pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    tooltip=tooltip
+)
+
+st.pydeck_chart(deck)
+
+# 관광지 선택
+st.subheader("🏙️ 관광지 정보")
+
+selected_place = st.selectbox(
+    "가고 싶은 관광지를 선택하세요",
+    df["name"]
+)
+
+selected_info = df[df["name"] == selected_place].iloc[0]
+
+st.markdown(f"### 📌 {selected_info['name']}")
+st.write(selected_info["description"])
+st.info(f"🚇 가까운 지하철역: {selected_info['subway']}")
+
+st.success("서울 여행을 즐겨보세요 ✈️")
