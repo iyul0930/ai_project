@@ -11,7 +11,7 @@ st.title("✈️ AI 여행 추천 서비스")
 st.write("CSV 데이터를 활용한 여행지 추천 시스템")
 
 # CSV 파일 불러오기
-df = pd.read_csv("travel_data.csv")
+df = pd.read_csv("pages/travel_data.csv")
 
 col1, col2, col3 = st.columns(3)
 
